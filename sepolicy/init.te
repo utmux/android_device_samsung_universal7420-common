@@ -1,6 +1,9 @@
 # Mount debugfs on /sys/kernel/debug.
 allow init debugfs:dir mounton;
 
+# Mount the external modem firmware partition on /firmware.
+allow init firmware_file:dir mounton;
+
 # Mount EFS on /efs
 allow init efs_file:dir  mounton;
 

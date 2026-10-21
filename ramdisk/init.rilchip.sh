@@ -65,14 +65,17 @@ function svc_status {
 
 debug "rilchip command: \"$RILCHIP_STATE\""
 
-if [ "$(getprop ro.boot.baseband)" == "mdm2" ]; then
+if [ "$(getprop ro.product.device)" == "zerofltechn" ] || [ "$(getprop ro.boot.baseband)" == "mdm2" ]; then
 	IS_QC_DEVICE=1
 else
 	IS_QC_DEVICE=0
 fi
 debug "baseband: \"$(getprop ro.boot.baseband)\""
 
-if [ ! -f /proc/simslot_count ]; then
+if [ "$(getprop ro.product.device)" == "zerofltechn" ]; then
+	# ERK2 disables the simslot_count DTS node; G9200 is always dual-SIM.
+	SIMSLOT_COUNT=2
+elif [ ! -f /proc/simslot_count ]; then
 	error "cannot find /proc/simslot_count, assuming 1"
 	SIMSLOT_COUNT=1
 else
@@ -95,7 +98,11 @@ if [ "$RILCHIP_STATE" == "init" ]; then
 		$RILCHIP_RESETPROP ro.vendor.multisim.simslotcount 2
 		$RILCHIP_RESETPROP persist.radio.multisim.config   dsds
 		$RILCHIP_RESETPROP persist.multisim.config         dsds
-		$RILCHIP_RESETPROP ro.telephony.default_network    9,9
+		if [ "$IS_QC_DEVICE" == "1" ]; then
+			$RILCHIP_RESETPROP ro.telephony.default_network 9,1
+		else
+			$RILCHIP_RESETPROP ro.telephony.default_network 9,9
+		fi
 		$RILCHIP_RESETPROP ro.telephony.ril.config         simactivation
 	fi
 
@@ -103,8 +110,12 @@ elif [ "$RILCHIP_STATE" == "late-init" ]; then
 
 	NORIL=$(getprop ro.ril.noril)
 
-	# If RIL is disabled, stop everything
-	if [[ "$NORIL" == "1" ]] || [[ "$NORIL" == "yes" ]] || [[ $IS_QC_DEVICE == 1 ]]; then
+	# Keep the G9200 external modem online.  The legacy common-tree QC path
+	# stops other QC variants here, but that would tear down both G9200 RILs
+	# as soon as bootanimation finishes.
+	if [[ "$NORIL" == "1" ]] || [[ "$NORIL" == "yes" ]]; then
+		/system/bin/sh $0 stop
+	elif [[ $IS_QC_DEVICE == 1 ]] && [[ "$(getprop ro.product.device)" != "zerofltechn" ]]; then
 		/system/bin/sh $0 stop
 	fi
 
@@ -160,6 +171,34 @@ elif [ "$RILCHIP_STATE" == "restart" ]; then
 
 	# start everything again
 	/system/bin/sh $0 start
+
+elif [ "$RILCHIP_STATE" == "post-boot" ]; then
+
+	# The G9200 primary Samsung RIL can accept the framework's first data-call
+	# request before its QMI/WDS path is ready and never completes that request.
+	# Once boot and modem initialization have settled, restart only slot 1 and
+	# then the phone process.  Slot 2 stays online and the framework rebinds to
+	# both stable per-slot HIDL services.
+	if [ "$(getprop ro.product.device)" != "zerofltechn" ]; then
+		info "post-boot recovery is not required on this device"
+		exit 0
+	fi
+
+	debug "waiting for G9200 modem initialization... (15s)"
+	sleep 15
+	svc_stop ril-daemon
+	sleep 3
+	svc_start ril-daemon
+	debug "waiting for primary RIL registration... (8s)"
+	sleep 8
+
+	PHONE_PID=$(pidof com.android.phone)
+	if [ -n "$PHONE_PID" ]; then
+		info "restarting com.android.phone (pid $PHONE_PID)"
+		kill -9 $PHONE_PID
+	else
+		warn "com.android.phone is not running"
+	fi
 
 elif [ "$RILCHIP_STATE" == "status" ]; then
 

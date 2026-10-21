@@ -41,6 +41,7 @@ service lhd /system/bin/lhd /system/etc/lhd.conf
 # GPS
 service gpsd /system/bin/gpsd -c /system/etc/gps.xml
     class main
+    setenv LD_PRELOAD /system/lib64/libprotobuf-cpp-shim.so
     user gps
     group system inet net_raw wakelock
     disabled

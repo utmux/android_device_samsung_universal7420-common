@@ -1,3 +1,6 @@
+[AID_VENDOR_QCOM_DIAG]
+value: 2901
+
 [efs/]
 mode: 0771
 user: AID_SYSTEM

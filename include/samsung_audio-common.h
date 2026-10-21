@@ -103,6 +103,7 @@ static bool zero_audio_supports_audience() {
 		case TMOBILE:
 		case CANADA:
 		case SPRINT:
+		case CHINA:
 			return true;
 		default:
 			return false;

@@ -62,7 +62,12 @@ if (bootloader.find("G920") != string::npos) {
 
     product = "zeroflte";
 
-    if (bootloader.find("G920F") != string::npos) {
+    if (bootloader.find("G9200") != string::npos) {
+        model = "SM-G9200";
+        device = "zerofltechn";
+        product = "zerofltezc";
+        dualsim = true;
+    } else if (bootloader.find("G920F") != string::npos) {
         if (device_orig != "zeroflteduo") {
             model = "SM-G920F";
             device = "zerofltexx";
@@ -246,7 +251,8 @@ else if (bootloader.find("N920") != string::npos) {
         property_override("persist.multisim.config", "dsds");
         property_override("persist.radio.multisim.config", "dsds");
         property_override("ro.multisim.simslotcount", "2");
-        property_override("ro.telephony.default_network", "9,9");
+        property_override("ro.telephony.default_network",
+                          device == "zerofltechn" ? "9,1" : "9,9");
     }
 }
 

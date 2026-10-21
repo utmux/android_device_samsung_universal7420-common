@@ -30,7 +30,8 @@ enum zero_model {
 	INDIA = 1,      // I
 	TMOBILE = 2,    // T
 	CANADA = 3,     // W8
-	SPRINT = 4      // P/R4/0/8/9
+	SPRINT = 4,     // P/R4/8/9
+	CHINA = 5       // G9200
 };
 
 static enum zero_model __zero_model = UNDEFINED;
@@ -64,9 +65,12 @@ static enum zero_model zero_model_read() {
 		!strncmp(bootloader, "G928W8", 6) || !strncmp(bootloader, "N920W8", 6)) {
 		__zero_model = CANADA;
 	}
+	else if (!strncmp(bootloader, "G9200", 5)) {
+		__zero_model = CHINA;
+	}
 	else if (!strncmp(bootloader, "G920P", 6)  || !strncmp(bootloader, "G925P", 6) ||
 	         !strncmp(bootloader, "G920R4", 6) || !strncmp(bootloader, "G925R4", 6) ||
-	         !strncmp(bootloader, "G9200", 6)  || !strncmp(bootloader, "G9250", 6) ||
+	         !strncmp(bootloader, "G9250", 6)  ||
 	         !strncmp(bootloader, "G9208", 6)  || !strncmp(bootloader, "G9258", 6) ||
 	         !strncmp(bootloader, "G9209", 6)  || !strncmp(bootloader, "G9259", 6)) {
 		__zero_model = SPRINT;

@@ -278,11 +278,18 @@ PRODUCT_PACKAGES += \
 ## Configs
 PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/configs/nfc/nfcee_access.xml:system/etc/nfcee_access.xml \
-	$(LOCAL_PATH)/configs/nfc/nfc_key:system/vendor/etc/nfc_key \
+	$(LOCAL_PATH)/configs/nfc/nfc_key:system/vendor/etc/nfc_key
+
+# G9200 has an NXP PN66T and supplies its own NXP stack configuration from the
+# device-specific vendor tree.  These files configure Samsung's S3FWRN5 and
+# make PN66T reject RF_DISCOVER.
+ifneq ($(findstring zerofltechn,$(TARGET_PRODUCT)),zerofltechn)
+PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/configs/nfc/libnfc-nci.conf:system/vendor/etc/libnfc-nci.conf \
 	$(LOCAL_PATH)/configs/nfc/libnfc-sec.conf:system/vendor/etc/libnfc-sec.conf \
 	$(LOCAL_PATH)/configs/nfc/libnfc-sec-hal.conf:system/vendor/etc/libnfc-sec-hal.conf \
 	$(LOCAL_PATH)/configs/nfc/libnfc-sec-vendor.conf:system/vendor/etc/libnfc-sec-vendor.conf
+endif
 
 ## Packages
 PRODUCT_PACKAGES += \
@@ -291,9 +298,15 @@ PRODUCT_PACKAGES += \
 	libsecnativefeature \
 	NfcNci \
 	Tag \
-	com.android.nfc_extras \
+	com.android.nfc_extras
+
+# The generic 1.0 service wraps the Samsung legacy HAL.  G9200 selects NXP's
+# source-built 1.1 service in its device makefile instead.
+ifneq ($(findstring zerofltechn,$(TARGET_PRODUCT)),zerofltechn)
+PRODUCT_PACKAGES += \
 	android.hardware.nfc@1.0-impl \
 	android.hardware.nfc@1.0-service
+endif
 
 #
 # Overlays

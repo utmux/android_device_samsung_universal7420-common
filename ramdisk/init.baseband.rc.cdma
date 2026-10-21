@@ -63,6 +63,7 @@ service cpboot-daemon /system/bin/cbd -d -t ss333 -b s -m l -P platform/15570000
     class main
     user root
     group radio cache inet misc audio sdcard_r sdcard_rw log shell
+    disabled
 on property:persist.sys.cpboot=disable
     stop cpboot-daemon
 
@@ -72,6 +73,7 @@ on property:persist.sys.cpboot=disable
 service ril-daemon /vendor/bin/hw/rild -c 1
 	class main
     socket rild stream 660 root radio
+    socket sap_uim_socket1 stream 660 bluetooth bluetooth
     socket rild-debug stream 660 radio system
     socket rild-cas stream 660 casdrm mmb
 	user root
@@ -82,7 +84,7 @@ service ril-daemon /vendor/bin/hw/rild -c 1
 #
 # RIL daemon for slot2
 #
-service ril-daemon1 /system/bin/rild -c 2
+service ril-daemon1 /vendor/bin/hw/rild -c 2 -s dsds
     class main
     socket rild2 stream 660 root radio
     socket rild-debug2 stream 660 radio system

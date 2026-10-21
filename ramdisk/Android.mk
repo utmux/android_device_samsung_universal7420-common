@@ -12,7 +12,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE            := init.baseband.rc
 LOCAL_MODULE_TAGS       := optional
 LOCAL_MODULE_CLASS      := ETC
-  ifneq ($(filter zerofltespr zeroltespr,$(TARGET_DEVICE)),)
+  ifeq ($(TARGET_DEVICE),zerofltechn)
+    LOCAL_SRC_FILES       := init.baseband.rc.chn
+  else ifneq ($(filter zerofltespr zeroltespr,$(TARGET_DEVICE)),)
     LOCAL_SRC_FILES       := init.baseband.rc.cdma
   else
     LOCAL_SRC_FILES       := init.baseband.rc.gsm
@@ -24,7 +26,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE            := init.rilchip.prop
 LOCAL_MODULE_TAGS       := optional
 LOCAL_MODULE_CLASS      := ETC
-  ifneq ($(filter zerofltespr zeroltespr,$(TARGET_DEVICE)),)
+  ifneq ($(filter zerofltechn zerofltespr zeroltespr,$(TARGET_DEVICE)),)
     LOCAL_SRC_FILES       := init.rilchip.prop.cdma
   else
     LOCAL_SRC_FILES       := init.rilchip.prop.gsm

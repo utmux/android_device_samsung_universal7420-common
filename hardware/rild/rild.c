@@ -174,6 +174,10 @@ int main(int argc, char **argv) {
 				rilLibPath = "/vendor/lib64/libsec-ril-spr";
 				break;
 
+			case CHINA:
+				rilLibPath = "/vendor/lib64/libsec-ril";
+				break;
+
 			default:
 				rilLibPath = "/vendor/lib64/libsec-ril";
 				break;
